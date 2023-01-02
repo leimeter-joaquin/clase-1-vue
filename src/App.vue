@@ -7,8 +7,4 @@
 </template>
 
 <style scoped>
-#todo {
-  width: 300px;
-  background-color: green;
-}
 </style>
