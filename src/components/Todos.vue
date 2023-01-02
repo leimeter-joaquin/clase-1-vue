@@ -1,15 +1,16 @@
 <script lang="ts">
+import { v4 as uuidv4 } from 'uuid';
 export default {
   data() {
     return {
 			inputText: '',
       todos: [
         {
-          id: Math.floor(Math.random() * 100000).toString(),
+          id: uuidv4(),
           description: "go shoppping",
         },
         {
-          id: Math.floor(Math.random() * 100000).toString(),
+          id: uuidv4(),
           description: "call mom",
         },
       ],
@@ -18,7 +19,7 @@ export default {
 	methods: {
 		add(description: string) {
 			this.todos = [...this.todos, {
-				id: Math.floor(Math.random() * 100000).toString(),
+				id: uuidv4(),
 				description: description
 			}]
 		},
@@ -38,8 +39,8 @@ export default {
 
 <template>
 	<div>
-		<ul>
-      <li v-for="item in todos" :key="item.id">
+		<ul class="todos">
+      <li v-for="item in todos" :key="item.id" class="bg-red-600">
 				{{ item.description }}
 				<button @click="remove(item.id)">remove</button>
 			</li>
@@ -48,3 +49,7 @@ export default {
 		<button @click="add(inputText)">add</button>
   </div>
 </template>
+
+<style scoped>
+
+</style>
