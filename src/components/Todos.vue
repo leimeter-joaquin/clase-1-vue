@@ -13,7 +13,7 @@ interface Todos {
 const todos = ref<Todos[]>([
   {
     id: uuidv4(),
-    description: "Go shoppping",
+    description: "Go shopping",
     priority: 1,
     done: true,
   },
@@ -58,22 +58,9 @@ const remove = (id: string) => {
 const sortByPiority = ref(false);
 watchEffect(() => {
   if (sortByPiority.value) {
-    todos.value.sort((a, b) => {
-      if (a["priority"] < b["priority"]) {
-        return 1;
-      } else {
-        return -1;
-      }
-    });
+    todos.value.sort((a, b) => b.priority - a.priority);
   } else {
-    // by default, all done todos go to the bottom of the list
-    todos.value.sort((a) => {
-      if (a.done) {
-        return 1;
-      } else {
-        return -1;
-      }
-    });
+    todos.value.sort((a) => (a.done ? 1 : -1));
   }
 });
 
@@ -82,8 +69,10 @@ const remainingTodos = computed(() => {
     return !t.done;
   }).length;
 });
+const sortBy = computed(() => {
+  return `Sort by ${sortByPiority.value ? "priority" : "status"}`;
+});
 </script>
-
 <template>
   <div class="flex mt-20 items-start justify-center gap-4">
     <div class="w-[300px] bg-[#333] p-2 rounded">
@@ -100,7 +89,7 @@ const remainingTodos = computed(() => {
             v-model="sortByPiority"
             class="relative inline-flex h-6 w-11 items-center rounded-full bg-white"
           >
-            <span class="sr-only">Enable notifications</span>
+            <span class="sr-only">{{ sortBy }}</span>
             <span
               :class="sortByPiority ? 'translate-x-6' : 'translate-x-1'"
               class="inline-block h-4 w-4 transform rounded-full bg-[#242424] transition"
@@ -109,7 +98,7 @@ const remainingTodos = computed(() => {
           <span>priority</span>
         </div>
       </div>
-      <ul class="space-y-2 flex flex-col items-end">
+      <ul v-auto-animate class="space-y-2 flex flex-col items-end">
         <li
           v-for="item in todos"
           :key="item.id"
@@ -138,6 +127,7 @@ const remainingTodos = computed(() => {
             min="1"
             max="3"
             v-model="priorityInput"
+            class="text-green-300 bg-green-500"
           />
         </div>
         <button
