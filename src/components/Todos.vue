@@ -56,6 +56,7 @@ const add = (description: string, priority: number) => {
       },
     ];
     textInput.value = "";
+    priorityInput.value = 1;
   }
 };
 
@@ -164,7 +165,7 @@ const showPreview = ref(true);
       <div
         class="flex flex-col items-center gap-2 justify-around mt-5 bg-[#35485e] p-2 pt-4 rounded"
       >
-        <input v-model="textInput" class="text-black outline-0 pl-2" />
+        <input v-model.trim="textInput" class="text-black outline-0 pl-2" />
         <div class="flex gap-2">
           <label for="priority">Priority {{ priorityInput }}</label>
           <input
@@ -173,7 +174,7 @@ const showPreview = ref(true);
             name="Priority"
             min="1"
             max="3"
-            v-model="priorityInput"
+            v-model.number="priorityInput"
             class="text-green-300 bg-green-500"
           />
         </div>
