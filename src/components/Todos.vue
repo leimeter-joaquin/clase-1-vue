@@ -13,10 +13,35 @@ interface Todos {
 }
 
 const todos = ref<Todos[] | null>(null);
+const shownTodos = computed(() => {
+  if (hideDoneTodos.value) return todos.value?.filter((t) => !t.done);
+  return todos.value;
+});
+
+const hideDoneTodos = ref(false);
+
+const remainingTodos = computed(() => {
+  return todos.value?.filter((t) => {
+    return !t.done;
+  }).length;
+});
+
+const sortByPiority = ref(false);
+
+watch(sortByPiority, () => {
+  if (sortByPiority.value) {
+    shownTodos.value?.sort((a, b) => b.priority - a.priority);
+  } else {
+    shownTodos.value?.sort((a) => (a.done ? 1 : -1));
+  }
+});
+
+const sortingBy = computed(() => {
+  return `Sorting by ${sortByPiority.value ? "priority" : "status"}`;
+});
 
 const textInput = ref("");
 const priorityInput = ref(1);
-const showPreview = ref(true);
 
 const add = (description: string, priority: number) => {
   if (priorityInput.value < 1 || priorityInput.value > 3) return;
@@ -41,25 +66,6 @@ const remove = (id: string) => {
     });
   }
 };
-
-const sortByPiority = ref(false);
-watchEffect(() => {
-  if (sortByPiority.value) {
-    todos.value?.sort((a, b) => b.priority - a.priority);
-  } else {
-    todos.value?.sort((a) => (a.done ? 1 : -1));
-  }
-});
-
-const remainingTodos = computed(() => {
-  return todos.value?.filter((t) => {
-    return !t.done;
-  }).length;
-});
-
-const sortingBy = computed(() => {
-  return `Sorting by ${sortByPiority.value ? "priority" : "status"}`;
-});
 
 onMounted(async () => {
   try {
@@ -96,6 +102,8 @@ onMounted(async () => {
     console.error(err);
   }
 });
+
+const showPreview = ref(true);
 </script>
 
 <template>
@@ -107,7 +115,12 @@ onMounted(async () => {
       </div>
 
       <div class="flex justify-end p-2 mb-3 rounded bg-[#35485e] gap-4">
-        <button class="py-1 px-3 button">Hide done todos</button>
+        <button
+          class="py-1 px-3 button"
+          @click="hideDoneTodos = !hideDoneTodos"
+        >
+          Hide done todos
+        </button>
         <p class="text-right">Sort By</p>
         <div class="flex gap-4">
           <span>status</span>
@@ -127,7 +140,7 @@ onMounted(async () => {
 
       <ul v-auto-animate class="space-y-2 flex flex-col items-end" v-if="todos">
         <li
-          v-for="item in todos"
+          v-for="item in shownTodos"
           :key="item.id"
           class="flex justify-end items-center gap-2 cursor-pointer truncate"
           @click="item.done = !item.done"
