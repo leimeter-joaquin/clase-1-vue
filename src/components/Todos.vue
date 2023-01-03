@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { v4 as uuidv4 } from "uuid";
 import { Switch } from "@headlessui/vue";
-import { computed, ref, watchEffect } from "vue";
+import { computed, onMounted, ref, watchEffect } from "vue";
+import axios from "axios";
 
 interface Todos {
   id: string;
@@ -10,20 +11,7 @@ interface Todos {
   done: boolean;
 }
 
-const todos = ref<Todos[]>([
-  {
-    id: uuidv4(),
-    description: "Go shopping",
-    priority: 1,
-    done: true,
-  },
-  {
-    id: uuidv4(),
-    description: "Call mom",
-    priority: 3,
-    done: false,
-  },
-]);
+const todos = ref<Todos[] | null>(null);
 
 // const newTodo = reactive({
 //   textInput: "",
@@ -35,7 +23,7 @@ const priorityInput = ref(1);
 
 const add = (description: string, priority: number) => {
   if (priorityInput.value < 1 || priorityInput.value > 3) return;
-  if (description) {
+  if (description && todos.value) {
     todos.value = [
       ...todos.value,
       {
@@ -50,32 +38,71 @@ const add = (description: string, priority: number) => {
 };
 
 const remove = (id: string) => {
-  todos.value = todos.value.filter((v) => {
-    return v.id !== id;
-  });
+  if (todos.value) {
+    todos.value = todos.value.filter((v) => {
+      return v.id !== id;
+    });
+  }
 };
 
 const sortByPiority = ref(false);
 watchEffect(() => {
   if (sortByPiority.value) {
-    todos.value.sort((a, b) => b.priority - a.priority);
+    todos.value?.sort((a, b) => b.priority - a.priority);
   } else {
-    todos.value.sort((a) => (a.done ? 1 : -1));
+    todos.value?.sort((a) => (a.done ? 1 : -1));
   }
 });
 
 const remainingTodos = computed(() => {
-  return todos.value.filter((t) => {
+  return todos.value?.filter((t) => {
     return !t.done;
   }).length;
 });
+
 const sortBy = computed(() => {
   return `Sort by ${sortByPiority.value ? "priority" : "status"}`;
+});
+
+onMounted(async () => {
+  try {
+    const { data, status } = await axios.get("http://localhost:4000/todos");
+    if (status !== 200) throw new Error("Error");
+    todos.value = data;
+  } catch (err) {
+    todos.value = [
+      {
+        id: uuidv4(),
+        description: "Mocked data, request failed",
+        priority: 3,
+        done: false,
+      },
+      {
+        id: uuidv4(),
+        description: "Call mom",
+        priority: 3,
+        done: false,
+      },
+      {
+        id: uuidv4(),
+        description: "Get Haircut",
+        priority: 1,
+        done: true,
+      },
+      {
+        id: uuidv4(),
+        description: "Call mom again",
+        priority: 3,
+        done: false,
+      },
+    ];
+    console.error(err);
+  }
 });
 </script>
 <template>
   <div class="flex mt-20 items-start justify-center gap-4">
-    <div class="w-[300px] bg-[#333] p-2 rounded">
+    <div class="bg-[#333] p-2 rounded" v-auto-animate>
       <div class="text-center flex flex-col mb-5 gap-1">
         <h1 class="text-3xl font-bold">Vue 3 To Do List</h1>
         <p class="">Remaining ({{ remainingTodos }})</p>
@@ -98,22 +125,25 @@ const sortBy = computed(() => {
           <span>priority</span>
         </div>
       </div>
-      <ul v-auto-animate class="space-y-2 flex flex-col items-end">
+      <ul v-auto-animate class="space-y-2 flex flex-col items-end" v-if="todos">
         <li
           v-for="item in todos"
           :key="item.id"
-          class="flex justify-end items-center gap-2 cursor-pointer"
+          class="flex justify-end items-center gap-2 cursor-pointer truncate"
           @click="item.done = !item.done"
         >
-          <span class="" :class="[{ 'line-through': item.done }]">{{
-            item.description
-          }}</span>
+          <span
+            class="overflow-ellipsis"
+            :class="[{ 'line-through': item.done }]"
+            >{{ item.description }}</span
+          >
           <span class="">{{ item.priority }}</span>
           <button @click="remove(item.id)" class="rounded-full w-5 h-5">
             x
           </button>
         </li>
       </ul>
+      <span v-else>...Loading</span>
       <div
         class="flex flex-col items-center gap-2 justify-around mt-5 bg-[#35485e] p-2 pt-4 rounded"
       >
