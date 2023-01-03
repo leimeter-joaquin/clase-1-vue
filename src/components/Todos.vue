@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { v4 as uuidv4 } from "uuid";
-import { reactive, ref, watch } from "vue";
+import { Switch } from "@headlessui/vue";
+import { computed, ref, watchEffect } from "vue";
 
 interface Todos {
   id: string;
@@ -24,13 +25,16 @@ const todos = ref<Todos[]>([
   },
 ]);
 
-const newTodo = reactive({
-  textInput: "",
-  priotityInput: 0,
-});
+// const newTodo = reactive({
+//   textInput: "",
+//   priotityInput: 1,
+// });
+
+const textInput = ref("");
+const priorityInput = ref(1);
 
 const add = (description: string, priority: number) => {
-  if (newTodo.priotityInput < 0 || newTodo.priotityInput > 3) return;
+  if (priorityInput.value < 1 || priorityInput.value > 3) return;
   if (description) {
     todos.value = [
       ...todos.value,
@@ -41,7 +45,7 @@ const add = (description: string, priority: number) => {
         done: false,
       },
     ];
-    newTodo.textInput = "";
+    textInput.value = "";
   }
 };
 
@@ -51,9 +55,9 @@ const remove = (id: string) => {
   });
 };
 
-const sortBy = ref<"priority" | "status">("status");
-watch(sortBy, () => {
-  if (sortBy.value === "priority") {
+const sortByPiority = ref(false);
+watchEffect(() => {
+  if (sortByPiority.value) {
     todos.value.sort((a, b) => {
       if (a["priority"] < b["priority"]) {
         return 1;
@@ -61,7 +65,8 @@ watch(sortBy, () => {
         return -1;
       }
     });
-  } else if (sortBy.value === "status") {
+  } else {
+    // by default, all done todos go to the bottom of the list
     todos.value.sort((a) => {
       if (a.done) {
         return 1;
@@ -71,62 +76,82 @@ watch(sortBy, () => {
     });
   }
 });
+
+const remainingTodos = computed(() => {
+  return todos.value.filter((t) => {
+    return !t.done;
+  }).length;
+});
 </script>
 
 <template>
-  <div class="w-[300px] m-auto mt-20">
-    <h1 class="text-center text-3xl font-bold mb-1">Vue 3 To Do List</h1>
-    <p class="text-center mb-5">Remaining ({{ todos.length }})</p>
-    <ul class="space-y-2">
-      <li
-        v-for="item in todos"
-        :key="item.id"
-        class="flex justify-end items-center"
-        :class="[{ 'line-through': item.done }]"
+  <div class="flex mt-20 items-start justify-center gap-4">
+    <div class="w-[300px] bg-[#333] p-2 rounded">
+      <div class="text-center flex flex-col mb-5 gap-1">
+        <h1 class="text-3xl font-bold">Vue 3 To Do List</h1>
+        <p class="">Remaining ({{ remainingTodos }})</p>
+      </div>
+
+      <div class="flex justify-end p-2 mb-3 rounded bg-[#35485e] gap-8">
+        <p class="text-right">Sort By</p>
+        <div class="flex gap-4">
+          <span>status</span>
+          <Switch
+            v-model="sortByPiority"
+            class="relative inline-flex h-6 w-11 items-center rounded-full bg-white"
+          >
+            <span class="sr-only">Enable notifications</span>
+            <span
+              :class="sortByPiority ? 'translate-x-6' : 'translate-x-1'"
+              class="inline-block h-4 w-4 transform rounded-full bg-[#242424] transition"
+            />
+          </Switch>
+          <span>priority</span>
+        </div>
+      </div>
+      <ul class="space-y-2 flex flex-col items-end">
+        <li
+          v-for="item in todos"
+          :key="item.id"
+          class="flex justify-end items-center gap-2 cursor-pointer"
+          @click="item.done = !item.done"
+        >
+          <span class="" :class="[{ 'line-through': item.done }]">{{
+            item.description
+          }}</span>
+          <span class="">{{ item.priority }}</span>
+          <button @click="remove(item.id)" class="rounded-full w-5 h-5">
+            x
+          </button>
+        </li>
+      </ul>
+      <div
+        class="flex flex-col items-center gap-2 justify-around mt-5 bg-[#35485e] p-2 pt-4 rounded"
       >
-        <p class="ml-2">{{ item.description }}</p>
-        <button @click="remove(item.id)" class="rounded-full w-5 h-5 ml-5">
-          x
+        <input v-model="textInput" class="text-black outline-0 pl-2" />
+        <div class="flex gap-2">
+          <label for="priority">Priority {{ priorityInput }}</label>
+          <input
+            type="range"
+            id="priority"
+            name="Priority"
+            min="1"
+            max="3"
+            v-model="priorityInput"
+          />
+        </div>
+        <button
+          @click="add(textInput, priorityInput)"
+          class="rounded-lg px-2 py-1"
+        >
+          Add item
         </button>
-      </li>
-    </ul>
-    <div class="flex justify-around mt-5">
-      <input v-model="newTodo.textInput" class="text-black outline-0 pl-2" />
-
-      <label for="priority">Priority {{ newTodo.priotityInput }}</label>
-      <input
-        type="range"
-        id="priority"
-        name="Priority"
-        min="1"
-        max="4"
-        v-model="newTodo.priotityInput"
-      />
-
-      <button
-        @click="add(newTodo.textInput, newTodo.priotityInput)"
-        class="rounded-lg px-2 py-1"
-      >
-        Add item
-      </button>
-
-      <label for="priority_sort_selector">Priority</label>
-      <input
-        id="priority_sort_selector"
-        type="radio"
-        v-model="sortBy"
-        value="priority"
-      />
-
-      <label for="status_sort_selector">Status</label>
-      <input
-        id="status_sort_selector"
-        type="radio"
-        v-model="sortBy"
-        value="status"
-      />
+      </div>
+      <pre class="text-xs mt-4">{{
+        JSON.stringify({ textInput, priorityInput }, null, 2)
+      }}</pre>
     </div>
-    <!-- <pre class="text-xs">{{ JSON.stringify(todos, null, 2) }}</pre> -->
+    <pre class="text-xs">{{ JSON.stringify(todos, null, 2) }}</pre>
   </div>
 </template>
 
