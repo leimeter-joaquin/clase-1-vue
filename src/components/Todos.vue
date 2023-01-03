@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { v4 as uuidv4 } from "uuid";
 import { Switch } from "@headlessui/vue";
-import { computed, onMounted, ref, watchEffect } from "vue";
+import { computed, onMounted, ref, watch, watchEffect } from "vue";
+import { XMarkIcon } from "@heroicons/vue/24/solid";
 import axios from "axios";
 
 interface Todos {
@@ -13,13 +14,9 @@ interface Todos {
 
 const todos = ref<Todos[] | null>(null);
 
-// const newTodo = reactive({
-//   textInput: "",
-//   priotityInput: 1,
-// });
-
 const textInput = ref("");
 const priorityInput = ref(1);
+const showPreview = ref(true);
 
 const add = (description: string, priority: number) => {
   if (priorityInput.value < 1 || priorityInput.value > 3) return;
@@ -60,8 +57,8 @@ const remainingTodos = computed(() => {
   }).length;
 });
 
-const sortBy = computed(() => {
-  return `Sort by ${sortByPiority.value ? "priority" : "status"}`;
+const sortingBy = computed(() => {
+  return `Sorting by ${sortByPiority.value ? "priority" : "status"}`;
 });
 
 onMounted(async () => {
@@ -100,15 +97,17 @@ onMounted(async () => {
   }
 });
 </script>
+
 <template>
-  <div class="flex mt-20 items-start justify-center gap-4">
-    <div class="bg-[#333] p-2 rounded" v-auto-animate>
+  <div class="flex mt-20 ml-40 items-start justify-start gap-4">
+    <div class="bg-[#333] p-2 rounded">
       <div class="text-center flex flex-col mb-5 gap-1">
         <h1 class="text-3xl font-bold">Vue 3 To Do List</h1>
         <p class="">Remaining ({{ remainingTodos }})</p>
       </div>
 
-      <div class="flex justify-end p-2 mb-3 rounded bg-[#35485e] gap-8">
+      <div class="flex justify-end p-2 mb-3 rounded bg-[#35485e] gap-4">
+        <button class="py-1 px-3 button">Hide done todos</button>
         <p class="text-right">Sort By</p>
         <div class="flex gap-4">
           <span>status</span>
@@ -116,7 +115,7 @@ onMounted(async () => {
             v-model="sortByPiority"
             class="relative inline-flex h-6 w-11 items-center rounded-full bg-white"
           >
-            <span class="sr-only">{{ sortBy }}</span>
+            <span class="sr-only">{{ sortingBy }}</span>
             <span
               :class="sortByPiority ? 'translate-x-6' : 'translate-x-1'"
               class="inline-block h-4 w-4 transform rounded-full bg-[#242424] transition"
@@ -125,6 +124,7 @@ onMounted(async () => {
           <span>priority</span>
         </div>
       </div>
+
       <ul v-auto-animate class="space-y-2 flex flex-col items-end" v-if="todos">
         <li
           v-for="item in todos"
@@ -138,12 +138,16 @@ onMounted(async () => {
             >{{ item.description }}</span
           >
           <span class="">{{ item.priority }}</span>
-          <button @click="remove(item.id)" class="rounded-full w-5 h-5">
-            x
+          <button
+            @click="remove(item.id)"
+            class="rounded-full w-5 h-5 flex items-center justify-center"
+          >
+            <XMarkIcon class="h-4" />
           </button>
         </li>
       </ul>
       <span v-else>...Loading</span>
+
       <div
         class="flex flex-col items-center gap-2 justify-around mt-5 bg-[#35485e] p-2 pt-4 rounded"
       >
@@ -167,11 +171,20 @@ onMounted(async () => {
           Add item
         </button>
       </div>
+
       <pre class="text-xs mt-4">{{
         JSON.stringify({ textInput, priorityInput }, null, 2)
       }}</pre>
     </div>
-    <pre class="text-xs">{{ JSON.stringify(todos, null, 2) }}</pre>
+
+    <div>
+      <button @click="showPreview = !showPreview" class="py-1 px-3 mb-2 button">
+        toggle preview
+      </button>
+      <pre v-if="showPreview" class="text-xs">{{
+        JSON.stringify(todos, null, 2)
+      }}</pre>
+    </div>
   </div>
 </template>
 
