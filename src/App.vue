@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <Todos id="todo"/>
+  <Todos />
 </template>
 
 <style scoped>
