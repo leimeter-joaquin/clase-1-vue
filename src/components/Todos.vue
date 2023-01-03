@@ -109,22 +109,22 @@ const showPreview = ref(true);
 
 <template>
   <div class="flex mt-20 ml-40 items-start justify-start gap-4">
-    <div class="bg-[#333] p-2 rounded">
+    <div>
       <div class="text-center flex flex-col mb-5 gap-1">
         <h1 class="text-3xl font-bold">Vue 3 To Do List</h1>
         <p class="">Remaining ({{ remainingTodos }})</p>
       </div>
 
-      <div class="flex justify-end p-2 mb-3 rounded bg-[#35485e] gap-4">
+      <div class="flex justify-end items-center px-2 py-4 rounded bg-[#303030] rounded-lg gap-4">
         <button
-          class="py-1 px-3 button"
+          class="py-1 px-3 rounded-xl"
           @click="hideDoneTodos = !hideDoneTodos"
         >
           {{ !hideDoneTodos ? "Hide" : "Show" }} done todos
         </button>
-        <p class="text-right">Sort By</p>
-        <div class="flex gap-4">
-          <span>status</span>
+        <p class="text-right">Sort By:</p>
+        <div class="flex items-center gap-2">
+          <span class="font-bold">status</span>
           <Switch
             v-model="sortByPiority"
             class="relative inline-flex h-6 w-11 items-center rounded-full bg-white"
@@ -135,11 +135,11 @@ const showPreview = ref(true);
               class="inline-block h-4 w-4 transform rounded-full bg-[#242424] transition"
             />
           </Switch>
-          <span>priority</span>
+          <span class="font-bold">priority</span>
         </div>
       </div>
 
-      <ul v-auto-animate class="space-y-2 flex flex-col items-end" v-if="todos">
+      <ul v-auto-animate class="space-y-2 flex flex-col items-end py-4" v-if="todos">
         <li
           v-for="item in shownTodos"
           :key="item.id"
@@ -163,9 +163,9 @@ const showPreview = ref(true);
       <span v-else>...Loading</span>
 
       <div
-        class="flex flex-col items-center gap-2 justify-around mt-5 bg-[#35485e] p-2 pt-4 rounded"
+        class="flex flex-col items-center gap-2 justify-around bg-[#303030] rounded-lg px-2 py-4 rounded"
       >
-        <input v-model.trim="textInput" class="text-black outline-0 pl-2" />
+        <input v-model.trim="textInput" class="text-black outline-0 rounded-md pl-2" />
         <div class="flex gap-2">
           <label for="priority">Priority {{ priorityInput }}</label>
           <input
@@ -175,12 +175,11 @@ const showPreview = ref(true);
             min="1"
             max="3"
             v-model.number="priorityInput"
-            class="text-green-300 bg-green-500"
           />
         </div>
         <button
           @click="add(textInput, priorityInput)"
-          class="rounded-lg px-2 py-1"
+          class="px-2 py-1 rounded-xl"
         >
           Add item
         </button>
@@ -192,8 +191,11 @@ const showPreview = ref(true);
     </div>
 
     <div>
-      <button @click="showPreview = !showPreview" class="py-1 px-3 mb-2 button">
-        toggle preview
+      <button
+        @click="showPreview = !showPreview"
+        class="py-1 px-3 mb-2 rounded-xl"
+      >
+        Toggle preview
       </button>
       <pre v-if="showPreview" class="text-xs">{{
         JSON.stringify(todos, null, 2)
@@ -205,6 +207,7 @@ const showPreview = ref(true);
 <style scoped>
 button {
   background-color: rgba(209, 213, 219);
+  font-weight: 700;
   color: black;
 }
 
