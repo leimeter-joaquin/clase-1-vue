@@ -119,7 +119,7 @@ const showPreview = ref(true);
           class="py-1 px-3 button"
           @click="hideDoneTodos = !hideDoneTodos"
         >
-          Hide done todos
+          {{ !hideDoneTodos ? "Hide" : "Show" }} done todos
         </button>
         <p class="text-right">Sort By</p>
         <div class="flex gap-4">
