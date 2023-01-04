@@ -1,32 +1,43 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch, watchEffect } from "vue";
 import { useVModel } from "@vueuse/core";
 import { Switch } from "@headlessui/vue";
+import { Todos } from "../types";
 
 const props = defineProps<{
-  hideDoneTodos: boolean;
-  sortByPriority: boolean;
+  todos: Todos[] | null;
+  shownTodos: Todos[] | null;
 }>();
 
-const emit = defineEmits<{
-  (e: "update:hideDoneTodos", value: boolean): void;
-  (e: "update:sortByPriority", value: boolean): void;
+const emits = defineEmits<{
+  (e: "update:shownTodos"): void;
 }>();
 
-/**
- * useVmodel is a shorthand for, documentation: https://vueuse.org/core/usevmodel/#usevmodel
- *
- * hideDoneTodos.value = true (in script tag) OR @click="hideDoneTodos = true" (in template tag) --> emit('update:hideDoneTodos', true)
- * and
- * hideDoneTodos.value = props.hideDoneTodos // wrapped in a ref, check the types
- *
- * We do this to update the hideDoneTodos ref that is handled in the parent component Todos.vue.
- */
-const hideDoneTodos = useVModel(props, "hideDoneTodos", emit);
-const sortByPriority = useVModel(props, "sortByPriority", emit);
+const shownTodos = useVModel(props, "shownTodos", emits);
+
+const sortByPriority = ref(false);
+const hideDoneTodos = ref(false);
+
+watch(sortByPriority, () => {
+  console.log("entro");
+  if (sortByPriority.value) {
+    shownTodos.value?.sort((a, b) => b.priority - a.priority);
+  } else {
+    shownTodos.value?.sort((a) => (a.done ? 1 : -1));
+  }
+});
+
+watchEffect(() => {
+  if (hideDoneTodos.value) {
+    shownTodos.value = props.todos?.filter((t) => !t.done) ?? null;
+  } else {
+    console.log("object");
+    shownTodos.value = props.todos;
+  }
+});
 
 const sortingBy = computed(() => {
-  return `Sorting by ${props.sortByPriority ? "priority" : "status"}`;
+  return `Sorting by ${sortByPriority.value ? "priority" : "status"}`;
 });
 </script>
 

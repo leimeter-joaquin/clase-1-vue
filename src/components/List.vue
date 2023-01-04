@@ -1,16 +1,11 @@
 <script setup lang="ts">
-import { computed } from "vue";
 import { Todos } from "../types";
+import { XMarkIcon } from "@heroicons/vue/24/solid";
 
 const props = defineProps<{
   todos?: Todos[] | null;
-  hideDoneTodos: boolean;
+  shownTodos?: Todos[] | null;
 }>();
-
-const shownTodos = computed(() => {
-  if (props.hideDoneTodos) return props.todos?.filter((t) => !t.done);
-  return props.todos;
-});
 
 const emits = defineEmits<{
   (e: "remove", id: string): void;

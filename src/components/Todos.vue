@@ -1,35 +1,20 @@
 <script setup lang="ts">
 import { v4 as uuidv4 } from "uuid";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import axios from "axios";
 import { Todos } from "../types";
 import Header from "./Header.vue";
-import FilterControls from "./FilterControls.vue";
+import Filters from "./Filters.vue";
 import List from "./List.vue";
 import Form from "./Form.vue";
 
 const todos = ref<Todos[] | null>(null);
-const shownTodos = computed(() => {
-  if (hideDoneTodos.value) return todos.value?.filter((t) => !t.done);
-  return todos.value;
-});
-
-const hideDoneTodos = ref(false);
+const shownTodos = ref<Todos[] | null>(null);
 
 const remainingTodos = computed(() => {
   return todos.value?.filter((t) => {
     return !t.done;
   }).length;
-});
-
-const sortByPriority = ref(false);
-
-watch(sortByPriority, () => {
-  if (sortByPriority.value) {
-    shownTodos.value?.sort((a, b) => b.priority - a.priority);
-  } else {
-    shownTodos.value?.sort((a) => (a.done ? 1 : -1));
-  }
 });
 
 const add = ({
@@ -103,18 +88,11 @@ const showPreview = ref(true);
 <template>
   <div class="flex mt-20 ml-40 items-start justify-start gap-4">
     <div>
-      <Header :remaining-todos="remainingTodos" />
+      <Header :remainingTodos="remainingTodos" />
 
-      <FilterControls
-        v-model:hideDoneTodos="hideDoneTodos"
-        v-model:sortByPriority="sortByPriority"
-      />
+      <Filters :todos="todos" v-model:shownTodos="shownTodos" />
 
-      <List
-        :todos="todos"
-        :hide-done-todos="hideDoneTodos"
-        @remove="remove($event)"
-      />
+      <List :todos="todos" :shownTodos="shownTodos" @remove="remove($event)" />
 
       <Form @add="add($event)" />
     </div>
