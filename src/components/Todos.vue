@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import { v4 as uuidv4 } from "uuid";
-import { Switch } from "@headlessui/vue";
-import { computed, onMounted, ref, watch, watchEffect } from "vue";
-import { XMarkIcon } from "@heroicons/vue/24/solid";
+import { computed, onMounted, ref, watch } from "vue";
 import axios from "axios";
-
-interface Todos {
-  id: string;
-  description: string;
-  priority: number;
-  done: boolean;
-}
+import { Todos } from "../types";
+import Header from "./Header.vue";
+import FilterControls from "./FilterControls.vue";
+import List from "./List.vue";
+import Form from "./Form.vue";
 
 const todos = ref<Todos[] | null>(null);
 const shownTodos = computed(() => {
@@ -26,25 +22,24 @@ const remainingTodos = computed(() => {
   }).length;
 });
 
-const sortByPiority = ref(false);
+const sortByPriority = ref(false);
 
-watch(sortByPiority, () => {
-  if (sortByPiority.value) {
+watch(sortByPriority, () => {
+  if (sortByPriority.value) {
     shownTodos.value?.sort((a, b) => b.priority - a.priority);
   } else {
     shownTodos.value?.sort((a) => (a.done ? 1 : -1));
   }
 });
 
-const sortingBy = computed(() => {
-  return `Sorting by ${sortByPiority.value ? "priority" : "status"}`;
-});
-
-const textInput = ref("");
-const priorityInput = ref(1);
-
-const add = (description: string, priority: number) => {
-  if (priorityInput.value < 1 || priorityInput.value > 3) return;
+const add = ({
+  description,
+  priority,
+}: {
+  description: string;
+  priority: number;
+}) => {
+  if (priority < 1 || priority > 3) return;
   if (description && todos.value) {
     todos.value = [
       ...todos.value,
@@ -55,8 +50,6 @@ const add = (description: string, priority: number) => {
         done: false,
       },
     ];
-    textInput.value = "";
-    priorityInput.value = 1;
   }
 };
 
@@ -110,86 +103,21 @@ const showPreview = ref(true);
 <template>
   <div class="flex mt-20 ml-40 items-start justify-start gap-4">
     <div>
-      <div class="text-center flex flex-col mb-5 gap-1">
-        <h1 class="text-3xl font-bold">Vue 3 To Do List</h1>
-        <p class="">Remaining ({{ remainingTodos }})</p>
-      </div>
+      <Header :remaining-todos="remainingTodos" />
 
-      <div class="flex justify-end items-center px-2 py-4 rounded bg-[#303030] rounded-lg gap-4">
-        <button
-          class="py-1 px-3 rounded-xl"
-          @click="hideDoneTodos = !hideDoneTodos"
-        >
-          {{ !hideDoneTodos ? "Hide" : "Show" }} done todos
-        </button>
-        <p class="text-right">Sort By:</p>
-        <div class="flex items-center gap-2">
-          <span class="font-bold">status</span>
-          <Switch
-            v-model="sortByPiority"
-            class="relative inline-flex h-6 w-11 items-center rounded-full bg-white"
-          >
-            <span class="sr-only">{{ sortingBy }}</span>
-            <span
-              :class="sortByPiority ? 'translate-x-6' : 'translate-x-1'"
-              class="inline-block h-4 w-4 transform rounded-full bg-[#242424] transition"
-            />
-          </Switch>
-          <span class="font-bold">priority</span>
-        </div>
-      </div>
+      <FilterControls
+        v-model:hideDoneTodos="hideDoneTodos"
+        v-model:sortByPriority="sortByPriority"
+      />
 
-      <ul v-auto-animate class="space-y-2 flex flex-col items-end py-4" v-if="todos">
-        <li
-          v-for="item in shownTodos"
-          :key="item.id"
-          class="flex justify-end items-center gap-2 cursor-pointer truncate"
-          @click="item.done = !item.done"
-        >
-          <span
-            class="overflow-ellipsis"
-            :class="[{ 'line-through': item.done }]"
-            >{{ item.description }}</span
-          >
-          <span class="">{{ item.priority }}</span>
-          <button
-            @click="remove(item.id)"
-            class="rounded-full w-5 h-5 flex items-center justify-center"
-          >
-            <XMarkIcon class="h-4" />
-          </button>
-        </li>
-      </ul>
-      <span v-else>...Loading</span>
+      <List
+        :todos="todos"
+        :hide-done-todos="hideDoneTodos"
+        @remove="remove($event)"
+      />
 
-      <div
-        class="flex flex-col items-center gap-2 justify-around bg-[#303030] rounded-lg px-2 py-4 rounded"
-      >
-        <input v-model.trim="textInput" class="text-black outline-0 rounded-md pl-2" />
-        <div class="flex gap-2">
-          <label for="priority">Priority {{ priorityInput }}</label>
-          <input
-            type="range"
-            id="priority"
-            name="Priority"
-            min="1"
-            max="3"
-            v-model.number="priorityInput"
-          />
-        </div>
-        <button
-          @click="add(textInput, priorityInput)"
-          class="px-2 py-1 rounded-xl"
-        >
-          Add item
-        </button>
-      </div>
-
-      <pre class="text-xs mt-4">{{
-        JSON.stringify({ textInput, priorityInput }, null, 2)
-      }}</pre>
+      <Form @add="add($event)" />
     </div>
-
     <div>
       <button
         @click="showPreview = !showPreview"
@@ -204,7 +132,7 @@ const showPreview = ref(true);
   </div>
 </template>
 
-<style scoped>
+<style>
 button {
   background-color: rgba(209, 213, 219);
   font-weight: 700;
