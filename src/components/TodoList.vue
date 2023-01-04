@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Todos } from "../types";
 import { XMarkIcon } from "@heroicons/vue/24/solid";
+import TodoItem from "./TodoItem.vue"
 
 const props = defineProps<{
   todos?: Todos[] | null;
@@ -10,6 +11,10 @@ const props = defineProps<{
 const emits = defineEmits<{
   (e: "remove", id: string): void;
 }>();
+
+const removeItem = (id:string) => {
+  emits('removeItem', id)
+}
 </script>
 <template>
   <ul
@@ -21,20 +26,8 @@ const emits = defineEmits<{
       v-for="item in shownTodos"
       :key="item.id"
       class="flex justify-end items-center gap-2 cursor-pointer truncate"
-      @click="item.done = !item.done"
     >
-      <span
-        class="overflow-ellipsis"
-        :class="[{ 'line-through': item.done }]"
-        >{{ item.description }}</span
-      >
-      <span class="">{{ item.priority }}</span>
-      <button
-        @click="emits('remove', item.id)"
-        class="rounded-full w-5 h-5 flex items-center justify-center"
-      >
-        <XMarkIcon class="h-4" />
-      </button>
+      <TodoItem :todoItem="item" @removeItem="removeItem($event)" />
     </li>
   </ul>
   <span v-else>...Loading</span>

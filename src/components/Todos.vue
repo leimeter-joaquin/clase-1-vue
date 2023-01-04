@@ -5,7 +5,7 @@ import axios from "axios";
 import { Todos } from "../types";
 import Header from "./Header.vue";
 import Filters from "./Filters.vue";
-import List from "./List.vue";
+import TodoList from "./TodoList.vue";
 import Form from "./Form.vue";
 
 const todos = ref<Todos[] | null>(null);
@@ -40,9 +40,7 @@ const add = ({
 
 const remove = (id: string) => {
   if (todos.value) {
-    todos.value = todos.value.filter((v) => {
-      return v.id !== id;
-    });
+    todos.value = todos.value.filter((v) => v.id !== id);
   }
 };
 
@@ -92,7 +90,7 @@ const showPreview = ref(true);
 
       <Filters :todos="todos" v-model:shownTodos="shownTodos" />
 
-      <List :todos="todos" :shownTodos="shownTodos" @remove="remove($event)" />
+      <TodoList :todos="todos" :shownTodos="shownTodos" @removeItem="remove($event)" />
 
       <Form @add="add($event)" />
     </div>

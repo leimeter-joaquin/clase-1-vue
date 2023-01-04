@@ -19,21 +19,15 @@ const sortByPriority = ref(false);
 const hideDoneTodos = ref(false);
 
 watch(sortByPriority, () => {
-  console.log("entro");
-  if (sortByPriority.value) {
-    shownTodos.value?.sort((a, b) => b.priority - a.priority);
-  } else {
-    shownTodos.value?.sort((a) => (a.done ? 1 : -1));
-  }
+  shownTodos.value = sortByPriority.value
+    ? shownTodos.value?.sort((a, b) => b.priority - a.priority)
+    : shownTodos.value?.sort((a) => (a.done ? 1 : -1))
 });
 
 watchEffect(() => {
-  if (hideDoneTodos.value) {
-    shownTodos.value = props.todos?.filter((t) => !t.done) ?? null;
-  } else {
-    console.log("object");
-    shownTodos.value = props.todos;
-  }
+  shownTodos.value = hideDoneTodos.value
+    ? props.todos?.filter((t) => !t.done) ?? null
+    : props.todos
 });
 
 const sortingBy = computed(() => {
