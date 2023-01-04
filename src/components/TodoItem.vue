@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { XMarkIcon } from "@heroicons/vue/24/solid";
+import { Todo } from "../types";
 
 const props = defineProps<{
   todoItem: Todo;

@@ -2,11 +2,11 @@
 import { computed, ref, watch, watchEffect } from "vue";
 import { useVModel } from "@vueuse/core";
 import { Switch } from "@headlessui/vue";
-import { Todos } from "../types";
+import { Todo } from "../types";
 
 const props = defineProps<{
-  todos: Todos[] | null;
-  shownTodos: Todos[] | null;
+  todos: Todo[] | null;
+  shownTodos: Todo[] | null;
 }>();
 
 const emits = defineEmits<{

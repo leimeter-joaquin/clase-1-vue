@@ -2,14 +2,14 @@
 import { v4 as uuidv4 } from "uuid";
 import { computed, onMounted, ref } from "vue";
 import axios from "axios";
-import { Todos } from "../types";
+import { Todo } from "../types";
 import Header from "./Header.vue";
 import Filters from "./Filters.vue";
 import TodoList from "./TodoList.vue";
 import Form from "./Form.vue";
 
-const todos = ref<Todos[] | null>(null);
-const shownTodos = ref<Todos[] | null>(null);
+const todos = ref<Todo[] | null>(null);
+const shownTodos = ref<Todo[] | null>(null);
 
 const remainingTodos = computed(() => {
   return todos.value?.filter((t) => {

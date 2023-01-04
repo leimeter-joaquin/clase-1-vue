@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { Todos } from "../types";
+import { Todo } from "../types";
 import { XMarkIcon } from "@heroicons/vue/24/solid";
 import TodoItem from "./TodoItem.vue"
 
 const props = defineProps<{
-  todos?: Todos[] | null;
-  shownTodos?: Todos[] | null;
+  todos?: Todo[] | null;
+  shownTodos?: Todo[] | null;
 }>();
 
 const emits = defineEmits<{
