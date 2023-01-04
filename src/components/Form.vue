@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 
 const textInput = ref("");
 const priorityInput = ref(1);
@@ -16,12 +16,19 @@ const handleAdd = (description: string, priority: number) => {
   textInput.value = "";
   priorityInput.value = 1;
 };
+
+const input = ref<HTMLElement | null>();
+
+onMounted(() => {
+  input.value?.focus();
+});
 </script>
 <template>
   <div
     class="flex flex-col items-center gap-2 justify-around bg-[#303030] rounded-lg px-2 py-4 rounded"
   >
     <input
+      ref="input"
       v-model.trim="textInput"
       class="text-black outline-0 rounded-md pl-2"
     />
