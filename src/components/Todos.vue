@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { v4 as uuidv4 } from "uuid";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch, watchEffect } from "vue";
 import axios from "axios";
 import { Todo } from "../types";
 import Header from "./Header.vue";
-import Filters from "./Filters.vue";
+import FilterControls from "./FilterControls.vue";
 import TodoList from "./TodoList.vue";
 import Form from "./Form.vue";
 
 const todos = ref<Todo[] | null>(null);
 const shownTodos = ref<Todo[] | null>(null);
+const sortByPriority = ref(false);
+const hideDoneTodos = ref(false);
 
 const remainingTodos = computed(() => {
   return todos.value?.filter((t) => {
@@ -80,6 +82,20 @@ onMounted(async () => {
   }
 });
 
+watch(sortByPriority, () => {
+  if (shownTodos.value) {
+    shownTodos.value = sortByPriority.value
+      ? shownTodos.value?.sort((a, b) => b.priority - a.priority)
+      : shownTodos.value?.sort((a) => (a.done ? 1 : -1));
+  }
+});
+
+watchEffect(() => {
+  shownTodos.value = hideDoneTodos.value
+    ? todos.value?.filter((t) => !t.done) ?? null
+    : todos.value;
+});
+
 const showPreview = ref(true);
 </script>
 
@@ -88,9 +104,18 @@ const showPreview = ref(true);
     <div>
       <Header :remainingTodos="remainingTodos" />
 
-      <Filters :todos="todos" v-model:shownTodos="shownTodos" />
+      <FilterControls
+        :sortByPriority="sortByPriority"
+        :hideDoneTodos="hideDoneTodos"
+        @toggle-done-filter="hideDoneTodos = !hideDoneTodos"
+        @toggle-priority-filter="sortByPriority = !sortByPriority"
+      />
 
-      <TodoList :todos="todos" :shownTodos="shownTodos" @removeItem="remove($event)" />
+      <TodoList
+        :todos="todos"
+        :shownTodos="shownTodos"
+        @removeItem="remove($event)"
+      />
 
       <Form @add="add($event)" />
     </div>

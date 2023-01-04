@@ -1,37 +1,19 @@
 <script setup lang="ts">
 import { computed, ref, watch, watchEffect } from "vue";
-import { useVModel } from "@vueuse/core";
 import { Switch } from "@headlessui/vue";
-import { Todo } from "../types";
 
 const props = defineProps<{
-  todos: Todo[] | null;
-  shownTodos: Todo[] | null;
+  hideDoneTodos: boolean;
+  sortByPriority: boolean;
 }>();
 
-const emits = defineEmits<{
-  (e: "update:shownTodos"): void;
+const emit = defineEmits<{
+  (e: "toggleDoneFilter"): void;
+  (e: "togglePriorityFilter"): void;
 }>();
-
-const shownTodos = useVModel(props, "shownTodos", emits);
-
-const sortByPriority = ref(false);
-const hideDoneTodos = ref(false);
-
-watch(sortByPriority, () => {
-  shownTodos.value = sortByPriority.value
-    ? shownTodos.value?.sort((a, b) => b.priority - a.priority)
-    : shownTodos.value?.sort((a) => (a.done ? 1 : -1))
-});
-
-watchEffect(() => {
-  shownTodos.value = hideDoneTodos.value
-    ? props.todos?.filter((t) => !t.done) ?? null
-    : props.todos
-});
 
 const sortingBy = computed(() => {
-  return `Sorting by ${sortByPriority.value ? "priority" : "status"}`;
+  return `Sorting by ${props.sortByPriority ? "priority" : "status"}`;
 });
 </script>
 
@@ -39,17 +21,14 @@ const sortingBy = computed(() => {
   <div
     class="flex justify-end items-center px-2 py-4 rounded bg-[#303030] rounded-lg gap-4"
   >
-    <button
-      class="py-1 px-3 rounded-xl"
-      @click="hideDoneTodos = !hideDoneTodos"
-    >
+    <button class="py-1 px-3 rounded-xl" @click="emit('toggleDoneFilter')">
       {{ !hideDoneTodos ? "Hide" : "Show" }} done todos
     </button>
     <p class="text-right">Sort By:</p>
     <div class="flex items-center gap-2">
       <span class="font-bold">status</span>
       <Switch
-        v-model="sortByPriority"
+        @click="emit('togglePriorityFilter')"
         class="relative inline-flex h-6 w-11 items-center rounded-full bg-white"
       >
         <span class="sr-only">{{ sortingBy }}</span>

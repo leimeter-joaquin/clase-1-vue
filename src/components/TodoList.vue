@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Todo } from "../types";
 import { XMarkIcon } from "@heroicons/vue/24/solid";
-import TodoItem from "./TodoItem.vue"
+import TodoItem from "./TodoItem.vue";
 
 const props = defineProps<{
   todos?: Todo[] | null;
@@ -9,12 +9,12 @@ const props = defineProps<{
 }>();
 
 const emits = defineEmits<{
-  (e: "remove", id: string): void;
+  (e: "removeItem", id: string): void;
 }>();
 
-const removeItem = (id:string) => {
-  emits('removeItem', id)
-}
+const removeItem = (id: string) => {
+  emits("removeItem", id);
+};
 </script>
 <template>
   <ul
