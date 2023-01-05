@@ -16,7 +16,7 @@ const emit = defineEmits<{
 const showModal = ref(false);
 const selectedTodo = ref<Todo>();
 
-const handleopenModal = (todo: Todo) => {
+const handleOpenModal = (todo: Todo) => {
   showModal.value = true;
   selectedTodo.value = todo;
 };
@@ -32,15 +32,20 @@ const handleItemRemoval = () => {
 <template>
   <Modal @close="showModal = false" :show="showModal">
     <div>
-      <div class="py-8 px-8 text-black">
-        <p class="mb-8">Are you sure you want to delete this todo?</p>
+      <div class="p-8 text-black">
+        <h3 class="mb-8 text-2xl font-bold text-center">Are you sure you want to delete this item?</h3>
         <p class="font-bold text-center">{{ selectedTodo?.description }}</p>
       </div>
-      <div class="flex p-4 justify-center gap-8">
-        <button class="px-6 py-2" @click="showModal = false">close</button>
+      <div class="flex justify-center p-4 gap-8">
+        <button
+          class="px-6 py-2 rounded-xl"
+          @click="showModal = false"
+        >
+          Close
+        </button>
         <button
           v-if="selectedTodo"
-          class="px-6 py-2"
+          class="px-6 py-2 rounded-xl"
           @click="handleItemRemoval()"
         >
           Delete
@@ -58,7 +63,7 @@ const handleItemRemoval = () => {
       v-for="item in shownTodos"
       :key="item.id"
       :todoItem="item"
-      @removeItem="handleopenModal"
+      @removeItem="handleOpenModal"
     />
   </ul>
   <span v-else>...Loading</span>

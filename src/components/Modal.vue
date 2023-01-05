@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onUpdated, ref, watch } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -19,7 +19,7 @@ const emit = defineEmits<{
 
 const modal = ref<HTMLElement | null>(null);
 
-onMounted(() => {
+onUpdated(() => {
   modal.value?.focus();
 });
 </script>
@@ -29,15 +29,15 @@ onMounted(() => {
       <div
         v-if="show"
         ref="modal"
-        tabindex="-1"
+        tabindex="1"
         class="fixed z-30 inset-0 flex items-center justify-center"
         @keydown.esc="emit('close')"
       >
         <div
           @click="emit('close')"
-          class="z-20 absolute bg-white opacity-10 w-full h-full"
+          class="z-20 absolute bg-white opacity-30 w-full h-full"
         ></div>
-        <div class="z-30 w-1/2 bg-white flex flex-col rounded">
+        <div class="z-30 min-w-min bg-white flex flex-col justify-around rounded-xl min-h-[275px]">
           <slot></slot>
         </div>
       </div>
@@ -47,10 +47,7 @@ onMounted(() => {
 
 <style scoped>
 .modalButton {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  padding-left: 3rem;
-  padding-right: 3rem;
+  padding: 1rem 3rem;
 }
 
 .modal-enter-active,
